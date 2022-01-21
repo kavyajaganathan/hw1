@@ -1,4 +1,5 @@
 import nltk
+from tabulate import tabulate
 
 # import ssl
 # try:
@@ -89,12 +90,12 @@ class my_corpus():
             textfile.write(element + "\n")
         textfile.close()
         print("Test file created")
-        return (train_file, test_file, val_file)
 
-    def summary_statistics(self, train_file):
-        with open(train_file) as f:
+    def summary_statistics(self, data_file, train=False):
+        with open(data_file) as f:
             lines = [line.rstrip() for line in f]
         # term-frequency dictionary creation
+        # lines - holds keys of the dictionary you've created clarissa
         frequency_dict = dict()
         for token in lines:
             if token in frequency_dict:
@@ -111,18 +112,14 @@ class my_corpus():
                 tot_no_of_unk += value
                 no_of_out_of_vocab += 1
                 to_remove.append(key)
-        # print(tot_no_of_unk)
         for k in to_remove:
             frequency_dict.pop(k)
-        # print(tot_no_of_unk)
         frequency_dict['<UNK>'] = tot_no_of_unk
-        #with open('test_corpus.txt') as f:
-        #    test_lines = [line.rstrip() for line in f]
-        #no_of_types_unk = 0
-        #for token in test_lines:
-        #    if token not in frequency_dict.keys():
-        #        no_of_types_unk += 1
-        # print(no_of_types_unk)
+        if not train:
+            no_of_types_unk = 0
+            for token in lines:
+                if token not in frequency_dict.keys():
+                    no_of_types_unk += 1
         no_of_stop_words = 0
         stop_words = set(stopwords.words('english'))
         for words in lines:
@@ -134,31 +131,68 @@ class my_corpus():
         tokens_tag = pos_tag(lines)
         from collections import Counter
         counts = Counter(tag for word, tag in tokens_tag)
-        # print(counts)
         # Custom Metrics 2:
-        from nltk.corpus import inaugural
-        total_lens = 0
-        for i, sentence in enumerate(inaugural.sents(fileids='/Users/kavyajaganathan/Downloads/hw1/source_text.txt')):
-            total_lens += len(sentence)
-        # print(total_lens / i)
-        print("Summary Statistics:")
-        #print("Number of Tokens in each split:")
-        print("No.of Tokens:", len(train_file))
-        #print("Validation:", len(val_file))
-        #print("Test:", len(test_file))
-        print("\n")
-        print("Vocabulary Size:", original_size)
-        print("Number of <UNK> tokens:", tot_no_of_unk)
-        print("Number of out of vocabulary words:", no_of_out_of_vocab)
-        print("Number of types mapped to UNK:", no_of_types_unk)
-        print("Number of Stop Words:", no_of_stop_words)
-        print("\n")
-        print("Custom Metric 1: POS Tagging:")
-        for k, v in counts.items():
-            print(k, v)
-        print("Custom Metric 2: Average Sentence Length:")
-        print(total_lens / i)
-        return frequency_dict
+        text = ' '.join(lines)
+        sentences = text.split(".")
+        words = text.split(" ")
+        if (sentences[len(sentences) - 1] == ""):
+            avg = len(words) / len(sentences) - 1
+        else:
+            avg = len(words) / len(sentences)
+        data = []
+        data.append(len(lines))
+        # Vocabulary Size
+        data.append(original_size)
+        # Num of UNK tokens
+        data.append(tot_no_of_unk)
+        # Number of OOV
+        data.append(no_of_out_of_vocab)
+        # Number of types mapped to UNK
+        if train:
+            data.append('x')
+        else:
+            data.append(no_of_types_unk)
+        # Number of Stop Words
+        data.append(no_of_stop_words)
+        # Avg sentence length
+        data.append(avg)
+        # POS Tagging
+        data.append(counts)
+
+        return data, frequency_dict
+
+    def print_stats(self):
+        data_train, d = my_corpus.summary_statistics(self, 'train_corpus.txt', True)
+        d_test, dt1 = my_corpus.summary_statistics(self, 'test_corpus.txt', False)
+        d_val, dt_val = my_corpus.summary_statistics(self, 'val_corpus.txt', False)
+        table = [['data', 'i', 'ii', 'iii', 'iv', 'v', 'vi', 'Custom Metric 1- Average Sentence Length'],
+                 ['Train'] + data_train[0:7], ['Validation'] + d_val[0:7],
+                 ['Test'] + d_test[0:7]]
+        print(tabulate(table, headers='firstrow', tablefmt='grid'))
+        keys_train = []
+        val_train = []
+        keys_val = []
+        val_val = []
+        keys_test = []
+        val_test = []
+        for k, v in data_train[7].items():
+            keys_train.append(k)
+            val_train.append(v)
+        for k, v in d_val[7].items():
+            keys_val.append(k)
+            val_val.append(v)
+        for k, v in d_val[7].items():
+            keys_test.append(k)
+            val_test.append(v)
+        table_train = [keys_train[0:10], val_train[0:10]]
+        table_val = [keys_val[0:10], val_val[0:10]]
+        table_test = [keys_test[0:10], val_test[0:10]]
+        print('vii - Train')
+        print(tabulate(table_train, headers='firstrow', tablefmt='grid'))
+        print('vii - Validation')
+        print(tabulate(table_val, headers='firstrow', tablefmt='grid'))
+        print('vii - Test')
+        print(tabulate(table_test, headers='firstrow', tablefmt='grid'))
 
     def encode_as_ints(self, sequence):
 
@@ -181,10 +215,8 @@ class my_corpus():
 
 def main():
     corpus = my_corpus(None)
-    train_corpus_file, test_corpus_file, val_corpus_file = my_corpus.corpus_construction(corpus, "source_text.txt")
-    dictionary = my_corpus.summary_statistics(corpus, train_corpus_file)
-    dt = my_corpus.summary_statistics(corpus,test_corpus_file)
-    dt2 = my_corpus.summary_statistics(corpus,val_corpus_file)
+    my_corpus.corpus_construction(corpus, "source_text.txt")
+    my_corpus.print_stats(corpus)
     text = input('Please enter a test sequence to encode and recover: ')
     print(' ')
     ints = corpus.encode_as_ints(text)

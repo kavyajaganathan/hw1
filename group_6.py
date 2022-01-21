@@ -58,8 +58,9 @@ class encocde_decode():
 
 def main():
     corpus = my_corpus(None)
-    train_corpus_file, test_corpus_file, val_corpus_file = my_corpus.corpus_construction(corpus, "source_text.txt")
-    dictionary = my_corpus.summary_statistics(corpus, train_corpus_file, test_corpus_file, val_corpus_file)
+    my_corpus.corpus_construction(corpus, "source_text.txt")
+    unn_data, dictionary = my_corpus.summary_statistics(corpus, 'train_corpus.txt', True)
+    my_corpus.print_stats(corpus)
     c = list(dictionary.keys())
     req_dictionary = dict(enumerate(c))
     a = encocde_decode(None)
