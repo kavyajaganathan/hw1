@@ -91,8 +91,8 @@ class my_corpus():
         print("Test file created")
         return (train_file, test_file, val_file)
 
-    def summary_statistics(self, train_file, test_file, val_file):
-        with open('train_corpus.txt') as f:
+    def summary_statistics(self, train_file):
+        with open(train_file) as f:
             lines = [line.rstrip() for line in f]
         # term-frequency dictionary creation
         frequency_dict = dict()
@@ -116,12 +116,12 @@ class my_corpus():
             frequency_dict.pop(k)
         # print(tot_no_of_unk)
         frequency_dict['<UNK>'] = tot_no_of_unk
-        with open('test_corpus.txt') as f:
-            test_lines = [line.rstrip() for line in f]
-        no_of_types_unk = 0
-        for token in test_lines:
-            if token not in frequency_dict.keys():
-                no_of_types_unk += 1
+        #with open('test_corpus.txt') as f:
+        #    test_lines = [line.rstrip() for line in f]
+        #no_of_types_unk = 0
+        #for token in test_lines:
+        #    if token not in frequency_dict.keys():
+        #        no_of_types_unk += 1
         # print(no_of_types_unk)
         no_of_stop_words = 0
         stop_words = set(stopwords.words('english'))
@@ -142,10 +142,10 @@ class my_corpus():
             total_lens += len(sentence)
         # print(total_lens / i)
         print("Summary Statistics:")
-        print("Number of Tokens in each split:")
-        print("Train:", len(train_file))
-        print("Validation:", len(val_file))
-        print("Test:", len(test_file))
+        #print("Number of Tokens in each split:")
+        print("No.of Tokens:", len(train_file))
+        #print("Validation:", len(val_file))
+        #print("Test:", len(test_file))
         print("\n")
         print("Vocabulary Size:", original_size)
         print("Number of <UNK> tokens:", tot_no_of_unk)
@@ -158,6 +158,7 @@ class my_corpus():
             print(k, v)
         print("Custom Metric 2: Average Sentence Length:")
         print(total_lens / i)
+        return frequency_dict
 
     def encode_as_ints(self, sequence):
 
@@ -181,7 +182,9 @@ class my_corpus():
 def main():
     corpus = my_corpus(None)
     train_corpus_file, test_corpus_file, val_corpus_file = my_corpus.corpus_construction(corpus, "source_text.txt")
-    my_corpus.summary_statistics(corpus, train_corpus_file, test_corpus_file, val_corpus_file)
+    dictionary = my_corpus.summary_statistics(corpus, train_corpus_file)
+    dt = my_corpus.summary_statistics(corpus,test_corpus_file)
+    dt2 = my_corpus.summary_statistics(corpus,val_corpus_file)
     text = input('Please enter a test sequence to encode and recover: ')
     print(' ')
     ints = corpus.encode_as_ints(text)
@@ -196,5 +199,3 @@ def main():
 
 if __name__ == "__main__":
     main()
-
-    # word_tokenize("Hi this is Kavya.")
