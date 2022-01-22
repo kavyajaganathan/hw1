@@ -35,14 +35,14 @@ class my_corpus():
         lines = lines.lower()
         # replace Replace (i) years, (ii) decimals, (iii) date days, (iv) integers and
         # (v) all other numbers with <year>, <decimal>,<days>,<integer>and<other>tags in this lower text
-        regex_other = re.compile(r'(?=(?:\D*\d){10}(?:(?:\D*\d){3})?$)[\d-]+')
+        regex_other = re.compile(r'(?=(?:\D*\d){10}(?:(?:\D*\d){3})?$)[\d-]+') #ISBN Numbers
         regex_year = re.compile(r'(?:(?:18|19|20|21)[0-9]{2})')
         regex_decimal = re.compile(r'\d*\.\d+')
         regex_integer = re.compile(r'[+-]?\b[0-9]+')
-        regex_date_1 = re.compile(r'<integer>\s\w+\s<year>')
-        regex_date_2 = re.compile(r'<integer>\s\w+,\s<year>')
-        regex_date_3 = re.compile(r'<integer>\s\w+\s\s\[o.s.\s<integer>\s\w+\s\]\s<year>')
-        regex_date_4 = re.compile(r'(monday|tuesday|wednesday|thursday|friday|saturday|sunday)')
+        regex_date_1 = re.compile(r'<integer>\s\w+\s<year>') #20 November 2021
+        regex_date_2 = re.compile(r'<integer>\s\w+,\s<year>') #20 November, 2021
+        regex_date_3 = re.compile(r'<integer>\s\w+\s\s\[o.s.\s<integer>\s\w+\s\]\s<year>') #20 November[o.s. 20 December 2021 ] 2021
+        regex_date_4 = re.compile(r'(monday|tuesday|wednesday|thursday|friday|saturday|sunday)') #days of the week
         lines = regex_other.sub("<other>", lines)
         print("Other done")
         lines = regex_year.sub("<year>", lines)
@@ -125,7 +125,7 @@ class my_corpus():
             if words in stop_words:
                 no_of_stop_words += 1
         # Custom Metrics
-        # Custom Metrics 1:
+        # Custom Metrics 1: - POS tag
         from nltk import pos_tag
         tokens_tag = pos_tag(lines)
         from collections import Counter
