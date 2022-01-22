@@ -19,7 +19,6 @@ from nltk.corpus import stopwords
 
 # nltk.download('stopwords')
 # nltk.download('averaged_perceptron_tagger')
-# nltk.download('inaugural')
 
 
 class my_corpus():
@@ -181,7 +180,7 @@ class my_corpus():
         for k, v in d_val[7].items():
             keys_val.append(k)
             val_val.append(v)
-        for k, v in d_val[7].items():
+        for k, v in d_test[7].items():
             keys_test.append(k)
             val_test.append(v)
         table_train = [keys_train[0:10], val_train[0:10]]
